@@ -8,7 +8,7 @@ FLAG_3=0
 # Moving files to desktop and making virtual environment and installing all the dependencies #
 ##############################################################################################
 
-if test -f ~/Desktop/OFC/OFC.py; then
+if test -f ~/Desktop/MSIFanControl/MSIFanControl.py; then
     FLAG_3=1
 else
     echo "This is a shell script to install all the dependencies required for this software to run."
@@ -19,27 +19,29 @@ else
     echo "4 -> Expert"
     echo "----------Creating Folder for Open Freeze Center----------"
     cd ~/Desktop
-    mkdir OFC
+    mkdir MSIFanControl
     echo "----------Installing python3-virtualenv AND python3-venv and other dependencies----------"
     sudo apt update
     sudo apt upgrade
     sudo apt install python3-virtualenv python3-venv libgirepository1.0-dev libcairo2-dev
     echo "----------Creating Virtual Environment for Open Freeze Center----------"
-    python3 -m venv ~/Desktop/OFC
+    python3 -m venv ~/Desktop/MSIFanControl
     echo "----------Virtual Environment for Open Freeze Center created----------"
     echo "----------Installing PyGObject----------"
-    ~/Desktop/OFC/bin/pip3 install PyGObject==3.50.0
+    ~/Desktop/MSIFanControl/bin/pip3 install PyGObject==3.50.0
     echo "----------Installing PyCairo----------"
-    ~/Desktop/OFC/bin/pip3 install pycairo
+    ~/Desktop/MSIFanControl/bin/pip3 install pycairo
+    echo "----------Installing config----------"
+    ~/Desktop/MSIFanControl/bin/pip3 install config
     echo "----------Installing Expert----------"
     sudo apt-get install expect
     echo "----------Moving files to virtual environment----------"
-    cp -i ~/Downloads/OpenFreezeCenter/install.sh ~/Desktop/OFC
-    cp -i ~/Downloads/OpenFreezeCenter/file_1.sh ~/Desktop/OFC
-    cp -i ~/Downloads/OpenFreezeCenter/file_2.sh ~/Desktop/OFC
-    cp -i ~/Downloads/OpenFreezeCenter/OFC.py ~/Desktop/OFC
-    cp -i ~/Downloads/OpenFreezeCenter/README.md ~/Desktop/OFC
-    cp -i ~/Downloads/OpenFreezeCenter/LICENSE ~/Desktop/OFC
+    cp -i ~/Downloads/MSIFanControl/install.sh ~/Desktop/MSIFanControl
+    cp -i ~/Downloads/MSIFanControl/file_1.sh ~/Desktop/MSIFanControl
+    cp -i ~/Downloads/MSIFanControl/file_2.sh ~/Desktop/MSIFanControl
+    cp -i ~/Downloads/MSIFanControl/MSIFanControl.py ~/Desktop/MSIFanControl
+    cp -i ~/Downloads/MSIFanControl/README.md ~/Desktop/MSIFanControl
+    cp -i ~/Downloads/MSIFanControl/LICENSE ~/Desktop/MSIFanControl
     FLAG_3=1
 fi
 
@@ -53,14 +55,14 @@ if test -d /etc/modprobe.d; then
             FLAG_1=1
         else
             echo "----------Prepairing system for EC read/write----------"
-            cd ~/Desktop/OFC/
+            cd ~/Desktop/MSIFanControl/
             sudo ./file_1.sh
             FLAG_1=1
         fi
     else
         echo "----------Prepairing system for EC read/write----------"
         sudo touch /etc/modprobe.d/ec_sys.conf
-        cd ~/Desktop/OFC/
+        cd ~/Desktop/MSIFanControl/
         sudo ./file_1.sh
         FLAG_1=1
     fi
@@ -68,7 +70,7 @@ else
     echo "----------Prepairing system for EC read/write----------"
     mkdir /etc/modprobe.d
     sudo touch /etc/modprobe.d/ec_sys.conf
-    cd ~/Desktop/OFC/
+    cd ~/Desktop/MSIFanControl/
     sudo ./file_1.sh
     FLAG_1=1
 fi
@@ -79,14 +81,14 @@ if test -d /etc/modules-load.d; then
             FLAG_2=1
         else
             echo "----------Prepairing system for EC read/write----------"
-            cd ~/Desktop/OFC/
+            cd ~/Desktop/MSIFanControl/
             sudo ./file_2.sh
             FLAG_2=1
         fi
     else
         echo "----------Prepairing system for EC read/write----------"
         sudo touch /etc/modules-load.d/ec_sys.conf
-        cd ~/Desktop/OFC/
+        cd ~/Desktop/MSIFanControl/
         sudo ./file_2.sh
         FLAG_2=1
     fi
@@ -94,7 +96,7 @@ else
     echo "----------Prepairing system for EC read/write----------"
     mkdir /etc/modules-load.d
     sudo touch /etc/modules-load.d/ec_sys.conf
-    cd ~/Desktop/OFC/
+    cd ~/Desktop/MSIFanControl/
     sudo ./file_2.sh
     FLAG_2=1
 fi
@@ -106,11 +108,11 @@ else
 fi
 
 if [ "$FLAG_3" -eq 1 ]; then
-    if test -f ~/Desktop/OFC/config.py; then
+    if test -f ~/Desktop/MSIFanControl/config.py; then
         echo "----------Running Software----------"
-        sudo nohup ~/Desktop/OFC/bin/python3 ~/Desktop/OFC/OFC.py
+        sudo nohup ~/Desktop/MSIFanControl/bin/python3 ~/Desktop/MSIFanControl/MSIFanControl.py
     else
         echo "----------Running Software----------"
-        sudo nohup ~/Desktop/OFC/bin/python3 ~/Desktop/OFC/OFC.py
+        sudo nohup ~/Desktop/MSIFanControl/bin/python3 ~/Desktop/MSIFanControl/MSIFanControl.py
     fi
 fi

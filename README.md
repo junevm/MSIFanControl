@@ -1,15 +1,11 @@
-# OpenFreezeCenter
+# MSIFanControl
 
 - Provides a UI and automated scripts in order to control MSI Laptops. Check the #Supported section to see what models are supported.
 - Made for Linux, as MSI does not have a native Linux client.
-- if you do now want to run the GUI or if it is not working for you then try
-  # OpenFreezeCenter-Lite (OFC-l)
-  - Same thing just without GUI
-  - https://github.com/YoCodingMonster/OpenFreezeCenter-Lite
 
 # INSTALLATION / UPDATING
 
-- `cd` into the download folder and execute (UBUNTU)
+- `cd` into the download folder and execute the following commands:
   - `chmod +x file_1.sh`
   - `chmod +x file_2.sh`
   - `chmod +x install.sh`
@@ -29,14 +25,6 @@
 ## Supported Linux Distro (tested)
 
 - Zorin
-
-## Goals
-
-- [x] Fan Control GUI
-- [x] Basic temperature and RPM monitoring
-- [ ] Advanced & Basic GUI control
-- [x] Battery Threshold
-- [ ] Webcam control
 
 ## Acknowledgements
 
