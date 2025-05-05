@@ -25,11 +25,11 @@ else
     python3 -m venv ./
     echo "----------Virtual Environment for Open Freeze Center created----------"
     echo "----------Installing PyGObject----------"
-    ~/Desktop/MSIFanControl/bin/pip3 install PyGObject==3.50.0
+    ./bin/pip3 install PyGObject==3.50.0
     echo "----------Installing PyCairo----------"
-    ~/Desktop/MSIFanControl/bin/pip3 install pycairo
+    ./bin/pip3 install pycairo
     echo "----------Installing config----------"
-    ~/Desktop/MSIFanControl/bin/pip3 install config
+    ./bin/pip3 install config
     echo "----------Installing Expert----------"
     sudo apt-get install expect
     FLAG_3=1
@@ -94,9 +94,9 @@ fi
 if [ "$FLAG_3" -eq 1 ]; then
     if test -f ./config.py; then
         echo "----------Running Software----------"
-        sudo nohup ./bin/python3 ~/Desktop/MSIFanControl/MSIFanControl.py
+        sudo nohup ./bin/python3 MSIFanControl.py
     else
         echo "----------Running Software----------"
-        sudo nohup ./bin/python3 ~/Desktop/MSIFanControl/MSIFanControl.py
+        sudo nohup ./bin/python3 MSIFanControl.py
     fi
 fi

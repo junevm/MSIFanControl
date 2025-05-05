@@ -1,1 +1,7 @@
 nohup.out
+lib64
+lib
+include
+bin
+__pycache__
+config.py
