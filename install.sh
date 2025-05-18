@@ -23,7 +23,7 @@ else
     sudo apt install python3-virtualenv python3-venv libgirepository1.0-dev libcairo2-dev
     echo "----------Creating Virtual Environment----------"
     python3 -m venv ./
-    echo "----------Virtual Environment for Open Freeze Center created----------"
+    echo "----------Virtual Environment for MSIFanControl created----------"
     echo "----------Installing PyGObject----------"
     ./bin/pip3 install PyGObject==3.50.0
     echo "----------Installing PyCairo----------"

@@ -1,32 +1,59 @@
 # MSIFanControl
 
-- Provides a UI and automated scripts in order to control MSI Laptops. Check the #Supported section to see what models are supported.
-- Made for Linux, as MSI does not have a native Linux client.
+**MSIFanControl** offers a user-friendly interface and automated scripts to control MSI laptop fans on Linux systems.
 
-# INSTALLATION / UPDATING
+## 🚀 Features
 
-- `cd` into the download folder and execute the following commands:
-  - `chmod +x file_1.sh`
-  - `chmod +x file_2.sh`
-  - `chmod +x install.sh`
-- Now run the `install.sh`, That will install all the dependencies and create a virtual python environment on desktop for the script to work.
-- If you get any like `FileNotFoundError: [Errno 2] No such file or directory: '/sys/kernel/debug/ec/ec0/io'` then run the following command:
-  - `sudo modprobe ec_sys write_support=1`
-- (ONLY FOR INSTALLATION) `Reboot` after the script complete the first run.
+- Simple UI for fan control
+- Automated scripts for convenience
+- Tested on select MSI laptops and Linux distros
 
-# RUNNING
+## 📋 Prerequisites
 
-- Run `install.sh` from the desktop folder.
+- [Task](https://taskfile.dev/) — Please install Task before proceeding.
 
-## Supported Laptop models (tested)
+## 🛠️ Installation & Update
+
+1. **Clone or download** this repository.
+2. **Ensure Task is installed** on your system.
+
+## ▶️ Running MSIFanControl
+
+Run the following command in your terminal:
+
+```sh
+task run
+```
+
+This will start MSIFanControl.
+
+## 🐞 Troubleshooting
+
+- **Error:**
+
+  ```
+  FileNotFoundError: [Errno 2] No such file or directory: '/sys/kernel/debug/ec/ec0/io'
+  ```
+
+  **Solution:**  
+  Run:
+
+  ```sh
+  sudo modprobe ec_sys write_support=1
+  ```
+
+- **Note:**  
+  A reboot may be required after the first installation.
+
+## 💻 Supported Laptop Models
 
 - MSI GF65 Thin 9SD
 
-## Supported Linux Distro (tested)
+## 🐧 Supported Linux Distros
 
-- Zorin
+- Zorin OS
 
-## Acknowledgements
+## 🙏 Acknowledgements
 
-- https://github.com/YoyPa/isw
-- https://github.com/YoCodingMonster/OpenFreezeCenter
+- [YoyPa/isw](https://github.com/YoyPa/isw)
+- [YoCodingMonster/OpenFreezeCenter](https://github.com/YoCodingMonster/OpenFreezeCenter)

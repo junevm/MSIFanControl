@@ -1,0 +1,12 @@
+version: 3
+
+tasks:
+  run:
+    desc: Run MSIFanControl
+    silent: true
+    cmds:
+      - chmod +x file_1.sh
+      - chmod +x file_2.sh
+      - sudo modprobe ec_sys write_support=1
+      - chmod +x install.sh
+      - sudo ./install.sh

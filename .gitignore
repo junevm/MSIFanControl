@@ -1,7 +1,8 @@
-nohup.out
-lib64
-lib
-include
-bin
-__pycache__
-config.py
+*
+!file_1.sh
+!file_2.sh
+!install.sh
+!README.md
+!MSIFanControl.py
+!pyenv.cfg
+!taskfile.yaml
