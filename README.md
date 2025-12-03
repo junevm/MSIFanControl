@@ -1,59 +1,42 @@
 # MSIFanControl
 
-**MSIFanControl** offers a user-friendly interface and automated scripts to control MSI laptop fans on Linux systems.
+Fan control TUI for MSI laptops on Linux.
 
-## 🚀 Features
+## Quick Start
 
-- Simple UI for fan control
-- Automated scripts for convenience
-- Tested on select MSI laptops and Linux distros
+### Option A: Install via Go (Recommended)
 
-## 📋 Prerequisites
-
-- [Task](https://taskfile.dev/) — Please install Task before proceeding.
-
-## 🛠️ Installation & Update
-
-1. **Clone or download** this repository.
-2. **Ensure Task is installed** on your system.
-
-## ▶️ Running MSIFanControl
-
-Run the following command in your terminal:
+You can install the tool directly from the repository without cloning:
 
 ```sh
-task run
+# Install 'fan' to your $GOPATH/bin (usually ~/go/bin)
+go install gitlab.com/junevm/MSIFanControl/cmd/fan@latest
+
+# Run
+$(go env GOPATH)/bin/fan
 ```
 
-This will start MSIFanControl.
+### Option B: Build from Source
 
-## 🐞 Troubleshooting
+```sh
+# 1. Clone
+git clone https://gitlab.com/junevm/MSIFanControl.git
+cd MSIFanControl
 
-- **Error:**
+# 2. Run directly
+task run
 
-  ```
-  FileNotFoundError: [Errno 2] No such file or directory: '/sys/kernel/debug/ec/ec0/io'
-  ```
+# OR Install to /usr/local/bin
+task install
+```
 
-  **Solution:**  
-  Run:
+## Requirements
 
-  ```sh
-  sudo modprobe ec_sys write_support=1
-  ```
+- Linux (Fedora/RedHat based preferred for auto-setup)
+- [Go](https://go.dev/) 1.24+
+- [Task](https://taskfile.dev/)
 
-- **Note:**  
-  A reboot may be required after the first installation.
-
-## 💻 Supported Laptop Models
+## Supported Models
 
 - MSI GF65 Thin 9SD
-
-## 🐧 Supported Linux Distros
-
-- Zorin OS
-
-## 🙏 Acknowledgements
-
-- [YoyPa/isw](https://github.com/YoyPa/isw)
-- [YoCodingMonster/OpenFreezeCenter](https://github.com/YoCodingMonster/OpenFreezeCenter)
+  _(May work on others with similar EC layouts)_
