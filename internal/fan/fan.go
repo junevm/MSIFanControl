@@ -2,8 +2,8 @@ package fan
 
 import (
 	"fmt"
-	"msifancontrol/internal/config"
-	"msifancontrol/internal/ec"
+	"gitlab.com/junevm/MSIFanControl/internal/config"
+	"gitlab.com/junevm/MSIFanControl/internal/ec"
 )
 
 // ApplyProfile sends the settings from the configuration to the hardware (EC).

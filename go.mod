@@ -1,4 +1,4 @@
-module msifancontrol
+module gitlab.com/junevm/MSIFanControl
 
 go 1.24.0
 

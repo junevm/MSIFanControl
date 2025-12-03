@@ -7,10 +7,10 @@ import (
 	"os"
 	"os/exec"
 
-	"msifancontrol/internal/config"
-	"msifancontrol/internal/fan"
-	"msifancontrol/internal/setup"
-	"msifancontrol/internal/ui"
+	"gitlab.com/junevm/MSIFanControl/internal/config"
+	"gitlab.com/junevm/MSIFanControl/internal/fan"
+	"gitlab.com/junevm/MSIFanControl/internal/setup"
+	"gitlab.com/junevm/MSIFanControl/internal/ui"
 )
 
 // main is the entry point of the application.

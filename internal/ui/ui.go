@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"msifancontrol/internal/config"
-	"msifancontrol/internal/fan"
-	"msifancontrol/internal/setup"
+	"gitlab.com/junevm/MSIFanControl/internal/config"
+	"gitlab.com/junevm/MSIFanControl/internal/fan"
+	"gitlab.com/junevm/MSIFanControl/internal/setup"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
