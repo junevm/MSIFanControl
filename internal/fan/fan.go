@@ -2,6 +2,7 @@ package fan
 
 import (
 	"fmt"
+
 	"gitlab.com/junevm/MSIFanControl/internal/config"
 	"gitlab.com/junevm/MSIFanControl/internal/ec"
 )
