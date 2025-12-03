@@ -5,8 +5,6 @@ tasks:
     desc: Run MSIFanControl
     silent: true
     cmds:
-      - chmod +x file_1.sh
-      - chmod +x file_2.sh
-      - sudo modprobe ec_sys write_support=1
       - chmod +x install.sh
-      - sudo ./install.sh
+      - ./install.sh
+      - export GI_TYPELIB_PATH=/usr/lib64/girepository-1.0:$GI_TYPELIB_PATH && sudo -E ./.venv/bin/python3 src/main.py

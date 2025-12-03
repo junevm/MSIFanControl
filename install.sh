@@ -1,102 +1,53 @@
 #!/bin/bash
+set -e
 
-FLAG_1=0
-FLAG_2=0
-FLAG_3=0
+echo "Setting up MSIFanControl..."
 
-##############################################################################################
-# Moving files to desktop and making virtual environment and installing all the dependencies #
-##############################################################################################
-
-if test -f ./bin/python; then
-    FLAG_3=1
-else
-    echo "This is a shell script to install all the dependencies required for this software to run."
-    echo "Dependencies required are as follows."
-    echo "1 -> python3-virtualenv AND python3-venv"
-    echo "2 -> PyGObject"
-    echo "3 -> PyCairo"
-    echo "4 -> Expert"
-    echo "----------Installing python3-virtualenv AND python3-venv and other dependencies----------"
+# 1. Install System Dependencies
+echo "Installing system dependencies..."
+if command -v dnf >/dev/null 2>&1; then
+    sudo dnf check-update || true
+    sudo dnf install -y python3-virtualenv gobject-introspection-devel cairo-gobject-devel cairo-devel python3-devel gtk4-devel libadwaita-devel
+elif command -v apt >/dev/null 2>&1; then
     sudo apt update
-    sudo apt upgrade
-    sudo apt install python3-virtualenv python3-venv libgirepository1.0-dev libcairo2-dev
-    echo "----------Creating Virtual Environment----------"
-    python3 -m venv ./
-    echo "----------Virtual Environment for MSIFanControl created----------"
-    echo "----------Installing PyGObject----------"
-    ./bin/pip3 install PyGObject==3.50.0
-    echo "----------Installing PyCairo----------"
-    ./bin/pip3 install pycairo
-    echo "----------Installing config----------"
-    ./bin/pip3 install config
-    echo "----------Installing Expert----------"
-    sudo apt-get install expect
-    FLAG_3=1
-fi
-
-################################
-# Prepairing the EC read/write #
-################################
-
-if test -d /etc/modprobe.d; then
-    if test -f /etc/modprobe.d/ec_sys.conf; then
-        if grep -q "options ec_sys write_support=1" "/etc/modprobe.d/ec_sys.conf"; then
-            FLAG_1=1
-        else
-            echo "----------Prepairing system for EC read/write----------"
-            sudo ./file_1.sh
-            FLAG_1=1
-        fi
-    else
-        echo "----------Prepairing system for EC read/write----------"
-        sudo touch /etc/modprobe.d/ec_sys.conf
-        sudo ./file_1.sh
-        FLAG_1=1
-    fi
+    sudo apt install -y python3-virtualenv python3-venv libgirepository1.0-dev libcairo2-dev libgtk-4-dev libadwaita-1-dev
 else
-    echo "----------Prepairing system for EC read/write----------"
-    mkdir /etc/modprobe.d
-    sudo touch /etc/modprobe.d/ec_sys.conf
-    sudo ./file_1.sh
-    FLAG_1=1
+    echo "Unsupported package manager. Please install dependencies manually."
 fi
 
-if test -d /etc/modules-load.d; then
-    if test -f /etc/modules-load.d/ec_sys.conf; then
-        if grep -q "ec_sys" "/etc/modules-load.d/ec_sys.conf"; then
-            FLAG_2=1
-        else
-            echo "----------Prepairing system for EC read/write----------"
-            sudo ./file_2.sh
-            FLAG_2=1
-        fi
+# 2. Create Virtual Environment
+echo "Creating virtual environment in .venv..."
+if [ ! -d ".venv" ]; then
+    python3 -m venv .venv
+fi
+
+# 3. Install Python Dependencies
+echo "Installing Python dependencies..."
+./.venv/bin/pip install --upgrade pip
+./.venv/bin/pip install PyGObject pycairo
+
+# 4. Setup EC Module
+echo "Setting up EC module..."
+# Check if we need to build it
+if ! modprobe -n ec_sys >/dev/null 2>&1; then
+    echo "ec_sys module not found. Running fix script..."
+    # We need to move the fix script back or reference it from legacy if we want to reuse it.
+    # But I should probably put a clean version in scripts/
+    if [ -f "legacy/fix_ec_sys.sh" ]; then
+        cp legacy/fix_ec_sys.sh scripts/fix_ec_sys.sh
+        chmod +x scripts/fix_ec_sys.sh
+        ./scripts/fix_ec_sys.sh
     else
-        echo "----------Prepairing system for EC read/write----------"
-        sudo touch /etc/modules-load.d/ec_sys.conf
-        sudo ./file_2.sh
-        FLAG_2=1
-    fi
-else
-    echo "----------Prepairing system for EC read/write----------"
-    mkdir /etc/modules-load.d
-    sudo touch /etc/modules-load.d/ec_sys.conf
-    sudo ./file_2.sh
-    FLAG_2=1
-fi
-
-if [ "$FLAG_1" -eq 1 ] && [ "$FLAG_2" -eq 1 ]; then
-    echo "----------EC read/write is enabled----------"
-else
-    echo "----------EC read/write is can not be enabled----------"
-fi
-
-if [ "$FLAG_3" -eq 1 ]; then
-    if test -f ./config.py; then
-        echo "----------Running Software----------"
-        sudo nohup ./bin/python3 MSIFanControl.py
-    else
-        echo "----------Running Software----------"
-        sudo nohup ./bin/python3 MSIFanControl.py
+        echo "Error: fix_ec_sys.sh not found."
     fi
 fi
+
+# Ensure module loading on boot
+echo "Configuring module loading..."
+echo "options ec_sys write_support=1" | sudo tee /etc/modprobe.d/ec_sys.conf > /dev/null
+echo "ec_sys" | sudo tee /etc/modules-load.d/ec_sys.conf > /dev/null
+
+# Load it now
+sudo modprobe ec_sys write_support=1 || true
+
+echo "Setup complete! Run 'task run' to start."
