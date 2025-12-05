@@ -1,7 +1,7 @@
 # MSIFanControl
 
 Fan control TUI for MSI laptops on Linux.
-
+![alt text](assets/image.png)
 ## Quick Start
 
 ### Option A: Install via Go (Recommended)
