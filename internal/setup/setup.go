@@ -1,6 +1,7 @@
 package setup
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -55,16 +56,29 @@ func RunFullSetup(progressChan chan<- string) error {
 	log("Starting automated build of ec_sys module...")
 
 	// Helper to run command and log output
-	run := func(name string, args ...string) error {
-		log("Running: %s %s", name, strings.Join(args, " "))
-		cmd := exec.Command(name, args...)
-		// We capture combined output to return on error, but we could also stream it.
-		// For now, let's just log the command and result.
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("%s failed: %v\nOutput:\n%s", name, err, string(out))
+	runCmd := func(cmd *exec.Cmd) error {
+		log("Running: %s %s", filepath.Base(cmd.Path), strings.Join(cmd.Args[1:], " "))
+		
+		stdout, _ := cmd.StdoutPipe()
+		cmd.Stderr = cmd.Stdout
+
+		if err := cmd.Start(); err != nil {
+			return fmt.Errorf("failed to start %s: %v", cmd.Path, err)
+		}
+
+		scanner := bufio.NewScanner(stdout)
+		for scanner.Scan() {
+			log(scanner.Text())
+		}
+
+		if err := cmd.Wait(); err != nil {
+			return fmt.Errorf("command failed: %v", err)
 		}
 		return nil
+	}
+
+	run := func(name string, args ...string) error {
+		return runCmd(exec.Command(name, args...))
 	}
 
 	// 1. Install tools
@@ -97,8 +111,8 @@ func RunFullSetup(progressChan chan<- string) error {
 	
 	cmd := exec.Command("dnf", "download", "--source", fmt.Sprintf("kernel-%s", unameR()))
 	cmd.Dir = workDir
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("failed to download kernel source: %w\nOutput: %s", err, string(output))
+	if err := runCmd(cmd); err != nil {
+		return fmt.Errorf("failed to download kernel source: %w", err)
 	}
 
 	// Find SRC RPM
@@ -131,8 +145,8 @@ func RunFullSetup(progressChan chan<- string) error {
 	specsDir := filepath.Join(rpmbuildDir, "SPECS")
 	cmd = exec.Command("rpmbuild", "-bp", fmt.Sprintf("--define=_topdir %s", rpmbuildDir), fmt.Sprintf("--target=%s", unameM()), "kernel.spec")
 	cmd.Dir = specsDir
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("failed to prepare kernel source: %w\nOutput: %s", err, string(output))
+	if err := runCmd(cmd); err != nil {
+		return fmt.Errorf("failed to prepare kernel source: %w", err)
 	}
 
 	// 8. Find build dir
@@ -171,17 +185,14 @@ func RunFullSetup(progressChan chan<- string) error {
 	// 10. Configure
 	log("10/13 Configuring kernel...")
 	runInDir := func(dir, name string, args ...string) error {
-		log("Running in %s: %s %s", filepath.Base(dir), name, strings.Join(args, " "))
 		cmd := exec.Command(name, args...)
 		cmd.Dir = dir
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("%s failed: %v\nOutput:\n%s", name, err, string(out))
-		}
-		return nil
+		return runCmd(cmd)
 	}
 
-	runInDir(kernelBuildDir, "cp", fmt.Sprintf("/boot/config-%s", unameR()), ".config")
+	if err := runInDir(kernelBuildDir, "cp", fmt.Sprintf("/boot/config-%s", unameR()), ".config"); err != nil {
+		return err
+	}
 	
 	f, err := os.OpenFile(filepath.Join(kernelBuildDir, ".config"), os.O_APPEND|os.O_WRONLY, 0644)
 	if err == nil {
@@ -194,11 +205,15 @@ func RunFullSetup(progressChan chan<- string) error {
 
 	// 11. Prepare build
 	log("11/13 Preparing build...")
-	runInDir(kernelBuildDir, "make", "modules_prepare")
+	if err := runInDir(kernelBuildDir, "make", "modules_prepare"); err != nil {
+		return err
+	}
 
 	symvers := fmt.Sprintf("/usr/src/kernels/%s/Module.symvers", unameR())
 	if _, err := os.Stat(symvers); err == nil {
-		runInDir(kernelBuildDir, "cp", symvers, ".")
+		if err := runInDir(kernelBuildDir, "cp", symvers, "."); err != nil {
+			return err
+		}
 	}
 
 	// 12. Build
@@ -206,8 +221,8 @@ func RunFullSetup(progressChan chan<- string) error {
 	cmd = exec.Command("make", "M=drivers/acpi", "modules")
 	cmd.Dir = kernelBuildDir
 	cmd.Env = append(os.Environ(), "KBUILD_MODPOST_WARN=1")
-	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("build failed: %w\nOutput: %s", err, string(output))
+	if err := runCmd(cmd); err != nil {
+		return fmt.Errorf("build failed: %w", err)
 	}
 
 	// 13. Install
@@ -215,9 +230,15 @@ func RunFullSetup(progressChan chan<- string) error {
 	koFile := filepath.Join(kernelBuildDir, "drivers", "acpi", "ec_sys.ko")
 	if _, err := os.Stat(koFile); err == nil {
 		destDir := fmt.Sprintf("/lib/modules/%s/extra", unameR())
-		run("mkdir", "-p", destDir)
-		run("cp", koFile, filepath.Join(destDir, "ec_sys.ko"))
-		run("depmod", "-a")
+		if err := run("mkdir", "-p", destDir); err != nil {
+			return err
+		}
+		if err := run("cp", koFile, filepath.Join(destDir, "ec_sys.ko")); err != nil {
+			return err
+		}
+		if err := run("depmod", "-a"); err != nil {
+			return err
+		}
 		log("Success! ec_sys.ko installed.")
 		return nil
 	}
@@ -285,5 +306,5 @@ func replaceInFile(path, pattern, replacement string) {
 			break
 		}
 	}
-	os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0644)
+	_ = os.WriteFile(path, []byte(strings.Join(lines, "\n")), 0644)
 }

@@ -10,6 +10,7 @@ import (
 	"gitlab.com/junevm/MSIFanControl/internal/setup"
 
 	"github.com/charmbracelet/bubbles/spinner"
+	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -114,7 +115,9 @@ type model struct {
 	setupRunning bool            // If true, setup is currently running.
 	setupErr     error           // Error from the setup process.
 	setupLog     string          // Current log message from setup.
+	fullLog      string          // Full log history
 	setupChan    chan string     // Channel for setup logs.
+	viewport     viewport.Model  // Viewport for scrolling logs
 }
 
 // InitialModel sets up the starting state of the application.
@@ -123,9 +126,16 @@ func InitialModel(cfg config.Config, needsSetup bool) model {
 	s.Spinner = spinner.Points
 	s.Style = lipgloss.NewStyle().Foreground(colorPink)
 
+	vp := viewport.New(0, 0)
+	vp.Style = lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(colorGray).
+		Padding(0, 1)
+
 	return model{
 		config:     cfg,
 		spinner:    s,
+		viewport:   vp,
 		profiles:   []string{"Auto", "Basic", "Advanced", "Cooler Booster"},
 		cursor:     cfg.Profile - 1, // Set cursor to the currently active profile.
 		needsSetup: needsSetup,
@@ -158,6 +168,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		m.viewport.Width = msg.Width - 20
+		m.viewport.Height = msg.Height - 10
 
 	// The user pressed a key.
 	case tea.KeyMsg:
@@ -195,6 +207,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.setupRunning = true
 					m.setupErr = nil
 					m.setupLog = "Initializing..."
+					m.fullLog = "Initializing setup...\n"
+					m.viewport.SetContent(m.fullLog)
 					m.setupChan = make(chan string, 10)
 					return m, tea.Batch(
 						runSetupCmd(m.setupChan),
@@ -228,6 +242,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Setup log received
 	case setupLogMsg:
 		m.setupLog = string(msg)
+		m.fullLog += string(msg) + "\n"
+		m.viewport.SetContent(m.fullLog)
+		m.viewport.GotoBottom()
 		return m, waitForSetupLog(m.setupChan)
 
 	// Setup finished
@@ -283,9 +300,9 @@ func (m model) View() string {
 	if m.needsSetup {
 		var content string
 		if m.setupRunning {
-			content = fmt.Sprintf("\n\n   %s Installing kernel module...\n\n   %s\n", m.spinner.View(), lipgloss.NewStyle().Foreground(colorGray).Render(m.setupLog))
+			content = fmt.Sprintf("\n\n   %s Installing kernel module...\n\n%s", m.spinner.View(), m.viewport.View())
 		} else if m.setupErr != nil {
-			content = fmt.Sprintf("\n\n   ❌ Setup Failed:\n   %v\n\n   Press [Enter] to retry or [q] to quit.", m.setupErr)
+			content = fmt.Sprintf("%s\n\n   ❌ Setup Failed:\n   %v\n\n   Press [Enter] to retry or [q] to quit.", m.viewport.View(), m.setupErr)
 		} else {
 			content = "\n\n   ⚠️  Kernel Module Setup\n\n   The 'ec_sys' module is required to control fans.\n   We can build and install it for you automatically.\n\n   Press [Enter] to install."
 		}
